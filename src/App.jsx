@@ -361,16 +361,27 @@ CRITICAL SPECIFIC RULES:
                       setVerifiedMap(prev => ({ ...prev, [seg.key]: true }));
                       setActiveTooltipIdx(null);
                     }}
-                    className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-semibold transition-colors"
+                    className="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[10px] font-semibold transition-colors"
                   >
                     Verify
                   </button>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
+                      const query = encodeURIComponent(seg.content);
+                      window.open(`https://google.com/search?q=${query}`, '_blank');
                       setActiveTooltipIdx(null);
                     }}
-                    className="px-2.5 py-1 bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded text-[10px] font-semibold transition-colors"
+                    className="px-2 py-1 bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded text-[10px] font-semibold transition-colors"
+                  >
+                    Search
+                  </button>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveTooltipIdx(null);
+                    }}
+                    className="px-2 py-1 bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded text-[10px] font-semibold transition-colors"
                   >
                     Dismiss
                   </button>
