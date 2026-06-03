@@ -25,6 +25,7 @@ export default function App() {
   // Signal State flags
   const [verifiedMap, setVerifiedMap] = useState({});
   const [activeTooltipIdx, setActiveTooltipIdx] = useState(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
   
   // TTV measurement
   const [ttvStart, setTtvStart] = useState(null);
@@ -50,6 +51,10 @@ export default function App() {
     // Pick random greeting on mount
     const randomIndex = Math.floor(Math.random() * greetings.length);
     setRandomGreeting(greetings[randomIndex]);
+    // Check if the device is a touch device
+    if (typeof window !== 'undefined') {
+      setIsTouchDevice(window.matchMedia('(pointer: coarse)').matches);
+    }
   }, []);
 
   // References
@@ -178,7 +183,10 @@ Here is the strict mapping rules:
 - Low confidence, unverified figures, or legacy/deprecated code usages: wrap in <signal level="red" confidence="XX%">Fact/Sentence</signal>
 
 CRITICAL SPECIFIC RULES:
-1. ONLY output the Q3 financial summary sentences ("Q3 revenue grew by 12% YoY.", "Customer retention in the enterprise segment held steady at 92%.", "The total addressable market size is currently estimated at $4.2 Billion.") IF the user's query is related to business performance, financial summaries, company stats, or Q3 reports.
+1. ONLY output the Q3 financial summary sentences IF the user's query is related to business performance, financial summaries, company stats, or Q3 reports:
+   - "Q3 revenue grew by 12% YoY." (You MUST tag this as level="green")
+   - "Customer retention in the enterprise segment held steady at 92%." (You MUST tag this as level="yellow")
+   - "The total addressable market size is currently estimated at $4.2 Billion." (You MUST tag this as level="red" confidence="68%")
 2. For all other general topics (programming, history, legal, science, everyday questions), answer the user's query directly and apply the <signal> tags dynamically to the factual claims, instructions, or estimates in YOUR ACTUAL response. Do not inject Q3 financials into unrelated answers.
 3. Ensure no other content is inside the tag attributes, only valid XML. Do not include spaces inside tag boundaries.`
       : `You are Claude. Respond to the user's query in plain text. Do not output any XML tags or <signal> highlights. Keep all statements simple and plain.`;
@@ -308,13 +316,39 @@ CRITICAL SPECIFIC RULES:
         return (
           <span 
             key={idx}
-            onClick={() => setActiveTooltipIdx(isTooltipOpen ? null : seg.key)}
+            onClick={() => {
+              if (isTouchDevice) {
+                setActiveTooltipIdx(isTooltipOpen ? null : seg.key);
+              }
+            }}
+            onMouseEnter={() => {
+              if (!isTouchDevice) {
+                setActiveTooltipIdx(seg.key);
+              }
+            }}
+            onMouseLeave={() => {
+              if (!isTouchDevice) {
+                setActiveTooltipIdx(null);
+              }
+            }}
             className="bg-red-100 dark:bg-red-950/40 text-red-950 dark:text-red-300 px-1 py-0.5 rounded cursor-pointer relative border-b border-red-400 border-dashed hover:bg-red-200 transition-all inline-block select-none"
           >
             {seg.content}
             {isTooltipOpen && (
               <span 
-                onClick={(e) => e.stopPropagation()} 
+                onClick={(e) => e.stopPropagation()}
+                onMouseEnter={(e) => {
+                  e.stopPropagation();
+                  if (!isTouchDevice) {
+                    setActiveTooltipIdx(seg.key);
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.stopPropagation();
+                  if (!isTouchDevice) {
+                    setActiveTooltipIdx(null);
+                  }
+                }}
                 className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-60 p-3 bg-[#252423] text-white border border-neutral-800 rounded-xl shadow-2xl z-50 text-[12px] font-normal leading-relaxed pointer-events-auto block"
               >
                 <span className="block mb-2 text-neutral-200">
@@ -322,7 +356,8 @@ CRITICAL SPECIFIC RULES:
                 </span>
                 <span className="flex items-center gap-1.5 justify-end">
                   <button 
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setVerifiedMap(prev => ({ ...prev, [seg.key]: true }));
                       setActiveTooltipIdx(null);
                     }}
@@ -331,7 +366,10 @@ CRITICAL SPECIFIC RULES:
                     Verify
                   </button>
                   <button 
-                    onClick={() => setActiveTooltipIdx(null)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveTooltipIdx(null);
+                    }}
                     className="px-2.5 py-1 bg-neutral-700 hover:bg-neutral-600 text-neutral-200 rounded text-[10px] font-semibold transition-colors"
                   >
                     Dismiss
