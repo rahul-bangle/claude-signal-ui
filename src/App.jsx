@@ -440,10 +440,7 @@ Make sure to format the output containing these three exact sentences when summa
                         <div className="flex-1 text-[14px] leading-relaxed text-[#252423] bg-white p-3 rounded-2xl border border-[#EAE9E6] shadow-sm">
                           {renderMessageContent(msg)}
                           
-                          <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-[#F3F2EE]">
-                            <span className="text-[10px] text-[#A3A19E]">
-                              🔢 Tokens: ~0.1K/190K | Status: ✅
-                            </span>
+                          <div className="flex items-center justify-end mt-3 pt-2.5 border-t border-[#F3F2EE]">
                             <button 
                               onClick={() => handleCopy(msg.text)}
                               className="flex items-center gap-1 px-2.5 py-1 bg-[#F3F2EE] hover:bg-[#EAE9E6] text-[#454341] rounded-full text-[10px] font-semibold transition-colors"
