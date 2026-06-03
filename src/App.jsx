@@ -170,13 +170,17 @@ export default function App() {
 
     const systemInstruction = currentSignalState 
       ? `You are Claude. You must respond in a friendly conversational style.
-Whenever you output factual claims, estimates, or statistics, you MUST wrap those specific sentences in custom XML <signal level="green|yellow|red" confidence="X%">...</signal> tags.
-Here is the strict mapping:
-- High confidence verified statements (e.g. "Q3 revenue grew by 12% YoY."): wrap in <signal level="green">Q3 revenue grew by 12% YoY.</signal>
-- Medium confidence statements (e.g. "Customer retention in the enterprise segment held steady at 92%."): wrap in <signal level="yellow">Customer retention in the enterprise segment held steady at 92%.</signal>
-- Low confidence or unverified statements (e.g. "The total addressable market size is currently estimated at $4.2 Billion."): wrap in <signal level="red" confidence="68%">The total addressable market size is currently estimated at $4.2 Billion.</signal>
+Whenever you output factual claims, estimates, statistics, code blocks, or logic, you MUST wrap those specific sentences in custom XML <signal level="green|yellow|red" confidence="X%">...</signal> tags.
 
-Make sure to format the output containing these three exact sentences when summarizing or talking about markets, revenue, and retention so the frontend flags work perfectly. Ensure no other content is inside the tag attributes, only valid XML. Do not include spaces inside tag boundaries.`
+Here is the strict mapping rules:
+- High confidence verified facts, clear code logic, or exact figures: wrap in <signal level="green">Fact/Sentence</signal>
+- Medium confidence statements, estimates, or general documentation claims: wrap in <signal level="yellow">Fact/Sentence</signal>
+- Low confidence, unverified figures, or legacy/deprecated code usages: wrap in <signal level="red" confidence="XX%">Fact/Sentence</signal>
+
+CRITICAL SPECIFIC RULES:
+1. ONLY output the Q3 financial summary sentences ("Q3 revenue grew by 12% YoY.", "Customer retention in the enterprise segment held steady at 92%.", "The total addressable market size is currently estimated at $4.2 Billion.") IF the user's query is related to business performance, financial summaries, company stats, or Q3 reports.
+2. For all other general topics (programming, history, legal, science, everyday questions), answer the user's query directly and apply the <signal> tags dynamically to the factual claims, instructions, or estimates in YOUR ACTUAL response. Do not inject Q3 financials into unrelated answers.
+3. Ensure no other content is inside the tag attributes, only valid XML. Do not include spaces inside tag boundaries.`
       : `You are Claude. Respond to the user's query in plain text. Do not output any XML tags or <signal> highlights. Keep all statements simple and plain.`;
 
     try {
